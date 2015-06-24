@@ -42,3 +42,14 @@ class Test_x86_64_jit(unittest.TestCase):
 
         rv, ctx_out = pyasmjit.x86_64_execute(code, ctx_in)
         self.assertEqual(0x3, ctx_out['rax'])
+
+    def test_precompiled_add(self):
+        binary = '\x48\x01\xd8'
+
+        ctx_in = {
+            'rax': 0x1,
+            'rbx': 0x2,
+        }
+
+        rv, ctx_out = pyasmjit.x86_64_execute_binary(binary, ctx_in)
+        self.assertEqual(0x3, ctx_out['rax'])

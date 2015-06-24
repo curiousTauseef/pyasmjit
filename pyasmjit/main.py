@@ -226,6 +226,82 @@ pop rbp
 ret
 """
 
+x86_64_template_precompiled =   \
+'\x55'                          \
+'\x48\x89\xE5'                  \
+'\x48\x83\xEC\x08'              \
+'\x50'                          \
+'\x53'                          \
+'\x51'                          \
+'\x52'                          \
+'\x57'                          \
+'\x56'                          \
+'\x41\x50'                      \
+'\x41\x51'                      \
+'\x41\x52'                      \
+'\x41\x53'                      \
+'\x41\x54'                      \
+'\x41\x55'                      \
+'\x41\x56'                      \
+'\x41\x57'                      \
+'\x48\x89\x7D\xF8'              \
+'\xFF\x77\x30'                  \
+'\x9D'                          \
+'\x48\x8B\x07'                  \
+'\x48\x8B\x5F\x08'              \
+'\x48\x8B\x4F\x10'              \
+'\x48\x8B\x57\x18'              \
+'\x48\x8B\x77\x28'              \
+'\x4C\x8B\x47\x48'              \
+'\x4C\x8B\x4F\x50'              \
+'\x4C\x8B\x57\x58'              \
+'\x4C\x8B\x5F\x60'              \
+'\x4C\x8B\x67\x68'              \
+'\x4C\x8B\x6F\x70'              \
+'\x4C\x8B\x77\x78'              \
+'\x4C\x8B\xBF\x80\x00\x00\x00'  \
+'\xFF\xB7\x88\x00\x00\x00'      \
+'\x9D'                          \
+'\x48\x8B\x7F\x20'              \
+'{code}'                        \
+'\x57'                          \
+'\x48\x8B\x7D\xF8'              \
+'\x48\x89\x07'                  \
+'\x48\x89\x5F\x08'              \
+'\x48\x89\x4F\x10'              \
+'\x48\x89\x57\x18'              \
+'\x48\x89\x77\x28'              \
+'\x4C\x89\x47\x48'              \
+'\x4C\x89\x4F\x50'              \
+'\x4C\x89\x57\x58'              \
+'\x4C\x89\x5F\x60'              \
+'\x4C\x89\x67\x68'              \
+'\x4C\x89\x6F\x70'              \
+'\x4C\x89\x77\x78'              \
+'\x4C\x89\xBF\x80\x00\x00\x00'  \
+'\x9C'                          \
+'\x8F\x87\x88\x00\x00\x00'      \
+'\x48\x89\xFE'                  \
+'\x5F'                          \
+'\x48\x89\x7E\x20'              \
+'\x41\x5F'                      \
+'\x41\x5E'                      \
+'\x41\x5D'                      \
+'\x41\x5C'                      \
+'\x41\x5B'                      \
+'\x41\x5A'                      \
+'\x41\x59'                      \
+'\x41\x58'                      \
+'\x5E'                          \
+'\x5F'                          \
+'\x5A'                          \
+'\x59'                          \
+'\x5B'                          \
+'\x58'                          \
+'\x48\x83\xC4\x08'              \
+'\x5D'                          \
+'\xC3'
+
 arm_template_assembly = """\
 /* Save registers */
 push {{r0 - r12, lr}}
@@ -346,6 +422,19 @@ def x86_64_execute(assembly, context):
     # Remove temporary files.
     os.remove(f_asm.name)
     os.remove(f_obj.name)
+
+    return rc, ctx
+
+def x86_64_execute_binary(binary, context):
+    # Initialize return values
+    rc = 0
+    ctx = {}
+
+    # Instantiate assembly template
+    binary = x86_64_template_precompiled.replace('{code}', binary)
+
+    # Run binary code
+    rc, ctx = pyasmjit.x86_64_jit(binary, context)
 
     return rc, ctx
 
