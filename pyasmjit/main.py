@@ -100,6 +100,36 @@ pop ebp
 ret
 """
 
+x86_template_precompiled =  \
+'\x55'                      \
+'\x89\xE5'                  \
+'\x60'                      \
+'\x8B\x45\x08'              \
+'\x8B\x58\x04'              \
+'\x8B\x48\x08'              \
+'\x8B\x50\x0C'              \
+'\x8B\x78\x10'              \
+'\x8B\x70\x14'              \
+'\xFF\x70\x24'              \
+'\x9D'                      \
+'\x8B\x00'                  \
+'{code}'                    \
+'\x50'                      \
+'\x8B\x45\x08'              \
+'\x89\x58\x04'              \
+'\x89\x48\x08'              \
+'\x89\x50\x0C'              \
+'\x89\x78\x10'              \
+'\x89\x70\x14'              \
+'\x9C'                      \
+'\x8F\x40\x24'              \
+'\x89\xC3'                  \
+'\x58'                      \
+'\x89\x03'                  \
+'\x61'                      \
+'\x5D'                      \
+'\xC3'
+
 x86_64_template_assembly = """\
 ;; Make sure to compile in 64 bits
 BITS 64
@@ -380,6 +410,19 @@ def x86_execute(assembly, context):
     # Remove temporary files.
     os.remove(f_asm.name)
     os.remove(f_obj.name)
+
+    return rc, ctx
+
+def x86_execute_binary(binary, context):
+    # Initialize return values
+    rc = 0
+    ctx = {}
+
+    # Instantiate assembly template
+    binary = x86_template_precompiled.replace('{code}', binary)
+
+    # Run binary code
+    rc, ctx = pyasmjit.x86_jit(binary, context)
 
     return rc, ctx
 
